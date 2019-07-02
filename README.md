@@ -1,2 +1,2 @@
 # luaclang-bindings
-Lua bindings for Libclang code to parse C declarations.
+Lua binding for Libclang code to parse C declarations.
