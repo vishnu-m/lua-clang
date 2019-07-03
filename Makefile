@@ -4,7 +4,7 @@ LDFLAGS = $(shell llvm-config --ldflags)
 all: luaclang
 
 luaclang: 
-	clang -I $(INCDIRS) $(LDFLAGS) src/luaclang.c -lclang -shared -fpic -o lib.so -Wall
+	clang -I $(INCDIRS) $(LDFLAGS) src/luaclang.c -lclang -shared -fpic -o luaclang.so -Wall
 
 clean:
 	rm -f lib.so
