@@ -10,7 +10,7 @@
 #define CURSOR_METATABLE "Clang.Cursor"
 #define TYPE_METATABLE   "Clang.Type"
 
-/* Creating CXIndex as userdata */
+/* Create CXIndex as userdata */
 
 static CXIndex * new_CXIndex(lua_State *L) 
 {
