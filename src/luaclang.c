@@ -1,6 +1,6 @@
 #include <clang-c/Index.h>
 #include <stdbool.h>
-#include <stdlib.h>
+
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
@@ -196,14 +196,14 @@ static int get_cursor_spelling(lua_State *L)
         return 1;
 }
 
-static CXString get_type_CXString(lua_State *L, CXCursor cur)
-{
-        CXType *type = new_CXType(L);
-        *type = clang_getCursorType(cur);
-        CXString type_spelling = clang_getTypeSpelling(*type);
-        clang_disposeString(type_spelling);
-        return type_spelling;
-}
+// static CXString get_type_CXString(lua_State *L, CXCursor cur)
+// {
+//         CXType *type = new_CXType(L);
+//         *type = clang_getCursorType(cur);
+//         CXString type_spelling = clang_getTypeSpelling(*type);
+//         clang_disposeString(type_spelling);
+//         return type_spelling;
+// }
 
 /*      
         Format - cur:getCursorType()
@@ -213,8 +213,9 @@ static CXString get_type_CXString(lua_State *L, CXCursor cur)
 static int get_cursor_type(lua_State *L)
 {
         CXCursor cur = to_CXCursor(L, 1);
-        CXString type_spelling = get_type_CXString(L, cur);
-        lua_settop(L, 0);
+        CXType *type = new_CXType(L);
+        *type = clang_getCursorType(cur);
+        CXString type_spelling = clang_getTypeSpelling(*type);
         lua_pushstring(L, clang_getCString(type_spelling));
         clang_disposeString(type_spelling);
         return 1;
@@ -296,12 +297,13 @@ static int get_storage_class(lua_State *L)
 static int get_result_type(lua_State *L)
 {
         CXCursor cur = to_CXCursor(L, 1);
-        CXString result_type = get_type_CXString(L, cur);
+        CXType *type = new_CXType(L);
+        *type = clang_getCursorType(cur);
+        CXString result_type = clang_getTypeSpelling(clang_getResultType(*type));
         lua_pushstring(L, clang_getCString(result_type));
-        clang_disposeString(result_type);
-
         return 1;
 }
+
 /*      
         Format - cur:getNumArgs()
         Parameter - cur - Cursor corresponding to which the number non-variadic arguments is to be obtained
