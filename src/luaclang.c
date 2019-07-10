@@ -196,15 +196,6 @@ static int get_cursor_spelling(lua_State *L)
         return 1;
 }
 
-// static CXString get_type_CXString(lua_State *L, CXCursor cur)
-// {
-//         CXType *type = new_CXType(L);
-//         *type = clang_getCursorType(cur);
-//         CXString type_spelling = clang_getTypeSpelling(*type);
-//         clang_disposeString(type_spelling);
-//         return type_spelling;
-// }
-
 /*      
         Format - cur:getCursorType()
         Parameter - cur - Cursor whose type is to be obtained    
