@@ -1,6 +1,7 @@
 #include <clang-c/Index.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
 #include "lua.h"
 #include "lualib.h"
 #include "lauxlib.h"
@@ -10,7 +11,7 @@
 #define CURSOR_METATABLE "Clang.Cursor"
 #define TYPE_METATABLE   "Clang.Type"
 
-/* Creating CXIndex as userdata */
+/* Create CXIndex as userdata */
 
 static CXIndex * new_CXIndex(lua_State *L) 
 {
@@ -108,9 +109,7 @@ static luaL_Reg clang_function[] = {
 static int dispose_CXIndex(lua_State *L) 
 {
         CXIndex *idx = to_CXIndex(L, 1);
-        //luaL_argcheck(L, idx != NULL, 1, "arg disposed");
         clang_disposeIndex(*idx);
-        *idx = NULL;
         return 0;
 }
 
@@ -134,6 +133,7 @@ static int parse_TU(lua_State *L)
 static luaL_Reg index_functions[] = {
         {"disposeIndex", dispose_CXIndex},
         {"parseTU", parse_TU},
+        {"__gc", dispose_CXIndex},
         {NULL, NULL}
 };
 
@@ -172,6 +172,7 @@ static int get_TU_cursor(lua_State *L)
 static luaL_Reg tu_functions[] = {
         {"disposeTU", dispose_CXTU},
         {"getTUCursor", get_TU_cursor},
+        {"__gc", dispose_CXTU},
         {NULL, NULL}
 };
 
