@@ -12,7 +12,7 @@
 
 /* Create CXIndex as userdata */
 
-static CXIndex * new_CXIndex(lua_State *L) 
+static CXIndex *new_CXIndex(lua_State *L) 
 {
         CXIndex *idx = (CXIndex*) lua_newuserdata(L, sizeof(CXIndex));
         luaL_getmetatable(L, INDEX_METATABLE);
@@ -30,7 +30,7 @@ static CXIndex to_CXIndex(lua_State *L, int n)
 
 /* Create CXTranslatioUnit as userdata */
 
-static CXTranslationUnit * new_CXTU(lua_State *L)
+static CXTranslationUnit *new_CXTU(lua_State *L)
 {
         CXTranslationUnit *tu = (CXTranslationUnit*) lua_newuserdata(L, sizeof(CXTranslationUnit));
         luaL_getmetatable(L, TU_METATABLE);
@@ -48,7 +48,7 @@ static CXTranslationUnit to_CXTU(lua_State *L, int n)
 
 /* Create CXCursor as userdata */
 
-static CXCursor * new_CXCursor(lua_State *L) 
+static CXCursor *new_CXCursor(lua_State *L) 
 {
         CXCursor *cur = (CXCursor*) lua_newuserdata(L, sizeof(CXCursor));
         luaL_getmetatable(L, CURSOR_METATABLE);
@@ -66,7 +66,7 @@ static CXCursor to_CXCursor(lua_State *L, int n)
 
 /* Create CXType as userdata */
 
-static CXType * new_CXType(lua_State *L)
+static CXType *new_CXType(lua_State *L)
 {
         CXType *t = (CXType*) lua_newuserdata(L, sizeof(CXType));
         luaL_getmetatable(L, TYPE_METATABLE);
@@ -156,7 +156,7 @@ static int dispose_CXTU(lua_State *L)
 }
 
 /*      
-        Format - tu:getTUCursor()
+        Format - tu:getCursor()
         Parameter - tu - Translation unit of which the cursor represents     
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#gaec6e69127920785e74e4a517423f4391
 */
@@ -174,7 +174,7 @@ static int get_TU_cursor(lua_State *L)
 
 static luaL_Reg tu_functions[] = {
         {"disposeTU", dispose_CXTU},
-        {"getTUCursor", get_TU_cursor},
+        {"getCursor", get_TU_cursor},
         {"__gc", dispose_CXTU},
         {NULL, NULL}
 };
@@ -183,7 +183,7 @@ static luaL_Reg tu_functions[] = {
 /* --Cursor functions-- */
 
 /*      
-        Format - cur:getCursorSpelling()
+        Format - cur:getSpelling()
         Parameter - cur - Cursor whose name is to be obtained    
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#gaad1c9b2a1c5ef96cebdbc62f1671c763
 */
@@ -197,7 +197,7 @@ static int get_cursor_spelling(lua_State *L)
 }
 
 /*      
-        Format - cur:getCursorType()
+        Format - cur:getType()
         Parameter - cur - Cursor whose type is to be obtained    
         More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#gaae5702661bb1f2f93038051737de20f4
 */
@@ -212,7 +212,8 @@ static int get_cursor_type(lua_State *L)
         return 1;
 }
 
-static const char * cursor_kind_str(enum CXCursorKind kind) 
+/* Return the cursor kind as a string */
+static const char *cursor_kind_str(enum CXCursorKind kind) 
 {
     switch (kind) {
         case CXCursor_StructDecl: 
@@ -241,7 +242,7 @@ static const char * cursor_kind_str(enum CXCursorKind kind)
 }
 
 /*      
-        Format - cur:getCursorKind()
+        Format - cur:getKind()
         Parameter - cur - Cursor whose kind is to be obtained    
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#ga018aaf60362cb751e517d9f8620d490c
 */
@@ -252,21 +253,18 @@ static int get_cursor_kind(lua_State *L)
         return 1;
 }
 
-static const char * storage_class_str(enum CX_StorageClass sc_specifier) 
+/* Returns the storage class specifier as a string */
+static const char *storage_class_str(enum CX_StorageClass sc_specifier) 
 {
         switch (sc_specifier) {
                 case CX_SC_Extern:
                         return "extern";
-                
                 case CX_SC_Static:
                         return "static";
-                
                 case CX_SC_Auto:
                         return "auto";
-
                 case CX_SC_Register:
                         return "register";
-                
                 default:
                         return "unknown";
         }
@@ -285,6 +283,11 @@ static int get_storage_class(lua_State *L)
         return 1;
 }
 
+/*
+        Format - cur:getStorageClass()
+        Parameter - cur - Cursor whose Result type is to be obtained(For function declaration)
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga39b4850746f39e17c6b8b4eef3154d85
+ */
 static int get_result_type(lua_State *L)
 {
         CXCursor cur = to_CXCursor(L, 1);
@@ -322,6 +325,11 @@ static int is_function_inline(lua_State *L)
         return 1;
 }
 
+/*      
+        Format - cur:getArgument()
+        Parameter - cur - Cursor of a fucntion/method whose associated argument cursor is to be obtained
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga673c5529d33eedd0b78aca5ac6fc1d7c
+*/
 static int get_argument(lua_State *L)
 {
         CXCursor cur = to_CXCursor(L, 1);
@@ -334,9 +342,9 @@ static int get_argument(lua_State *L)
 }
 
 static luaL_Reg cursor_functions[] = {
-        {"getCursorSpelling", get_cursor_spelling},
-        {"getCursorType", get_cursor_type},
-        {"getCursorKind", get_cursor_kind},
+        {"getSpelling", get_cursor_spelling},
+        {"getType", get_cursor_type},
+        {"getKind", get_cursor_kind},
         {"getStorageClass", get_storage_class},
         {"getResultType", get_result_type},
         {"getNumArgs", get_num_args},
