@@ -91,7 +91,7 @@ static int get_cursor(lua_State *L)
 {
         clang_parser *parser = to_clangparser(L, 1);
         CXCursor* cur = new_CXCursor(L);
-        luaL_argcheck(L, parser->tu != NULL, 1, "Parser object was disposed!");
+        luaL_argcheck(L, parser->tu != NULL, 1, "parser object was disposed");
         *cur = clang_getTranslationUnitCursor(parser->tu);
         if (clang_Cursor_isNull(*cur)) {
                 lua_pushnil(L);
