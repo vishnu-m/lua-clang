@@ -5,29 +5,29 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
-#define CLANG_METATABLE  "Clang.Object"
+#define CLANG_METATABLE  "Clang.Parser"
 #define CURSOR_METATABLE "Clang.Cursor"
 #define TYPE_METATABLE   "Clang.Type"
 
-typedef struct clang_object {
+typedef struct clang_parser {
         CXIndex idx;
         CXTranslationUnit tu;
-} clang_object;
+} clang_parser;
 
-/* Create clang_object as userdata */
-static clang_object *new_clangobject(lua_State *L) 
+/* Create clang_parser as userdata */
+static clang_parser *new_clangparser(lua_State *L) 
 {
-        clang_object *clang_parser = (clang_object*) lua_newuserdata(L, sizeof(clang_object));
+        clang_parser *parser = (clang_parser*) lua_newuserdata(L, sizeof(clang_parser));
         luaL_getmetatable(L, CLANG_METATABLE);
         lua_setmetatable(L, -2);
-        return clang_parser;
+        return parser;
 }
 
 /* Convert userdata type to  */
-static clang_object to_clangobject(lua_State *L, int n) 
+static clang_parser *to_clangparser(lua_State *L, int n) 
 {
-        clang_object *clang_parser = (clang_object*) luaL_checkudata(L, n, CLANG_METATABLE);
-        return *clang_parser;
+        clang_parser *parser = (clang_parser*) luaL_checkudata(L, n, CLANG_METATABLE);
+        return parser;
 }
 
 /*      
@@ -37,18 +37,18 @@ static clang_object to_clangobject(lua_State *L, int n)
                     2. https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html#ga2baf83f8c3299788234c8bce55e4472e
         Returns clang object whose translation unit cursor can be obtained.
 */
-static int create_clangobject(lua_State *L)
+static int create_clangparser(lua_State *L)
 {
         const char *file_name = lua_tostring(L, 1);
-        clang_object *clang_parser = new_clangobject(L);
-        clang_parser->idx = clang_createIndex(1, 0);
+        clang_parser *parser = new_clangparser(L);
+        parser->idx = clang_createIndex(1, 0);
         const char *args[] = {file_name};
-        clang_parser->tu = clang_parseTranslationUnit(clang_parser->idx, 0, args, 1, 0, 0, CXTranslationUnit_None);
+        parser->tu = clang_parseTranslationUnit(parser->idx, 0, args, 1, 0, 0, CXTranslationUnit_None);
         return 1;
 }
 
 /*      
-        Format - parserdisposeParser()
+        Format - parser:disposeParser()
         Parameter - parser - Clang object to be disposed
         More info - 1. https://clang.llvm.org/doxygen/group__CINDEX.html#ga51eb9b38c18743bf2d824c6230e61f93
                     2. https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html#ga2baf83f8c3299788234c8bce55e4472e
@@ -56,12 +56,12 @@ static int create_clangobject(lua_State *L)
 */
 static int dispose_clangobject(lua_State *L)
 {
-        clang_object clang_parser = to_clangobject(L, 1);
-        if (clang_parser.idx == NULL) return 0;
-        clang_disposeIndex(clang_parser.idx);
-        clang_disposeTranslationUnit(clang_parser.tu);
-        clang_parser.idx = NULL;
-        clang_parser.tu = NULL;
+        clang_parser *parser = to_clangparser(L, 1);
+        if (parser->idx == NULL) return 0;
+        clang_disposeIndex(parser->idx);
+        clang_disposeTranslationUnit(parser->tu);
+        parser->idx = NULL;
+        parser->tu = NULL;
         return 0;
 }
 
@@ -89,9 +89,9 @@ static  CXCursor to_CXCursor(lua_State *L, int n)
 */
 static int get_cursor(lua_State *L) 
 {
-        clang_object clang_parser = to_clangobject(L, 1);
+        clang_parser *parser = to_clangparser(L, 1);
         CXCursor* cur = new_CXCursor(L);
-        *cur = clang_getTranslationUnitCursor(clang_parser.tu);
+        *cur = clang_getTranslationUnitCursor(parser->tu);
         if (clang_Cursor_isNull(*cur)) {
                 lua_pushnil(L);
         }
@@ -99,7 +99,7 @@ static int get_cursor(lua_State *L)
 }
 
 static luaL_Reg clang_functions[] = {
-    {"newParser", create_clangobject},
+    {"newParser", create_clangparser},
     {"disposeParser", dispose_clangobject},
     {"getCursor", get_cursor},
     {"__gc", dispose_clangobject},
@@ -304,9 +304,7 @@ int luaopen_luaclang(lua_State *L)
 {
         new_metatable(L, CLANG_METATABLE, clang_functions);
         new_metatable(L, CURSOR_METATABLE, cursor_functions);
-
         lua_newtable(L);
         luaL_setfuncs(L, clang_functions, 0);
-
         return 1;
 }
