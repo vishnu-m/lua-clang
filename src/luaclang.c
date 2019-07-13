@@ -1,5 +1,6 @@
 #include <clang-c/Index.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "lua.h"
 #include "lualib.h"
@@ -40,10 +41,14 @@ static clang_parser *to_clangparser(lua_State *L, int n)
 static int create_clangparser(lua_State *L)
 {
         const char *file_name = lua_tostring(L, 1);
+        if (access(file_name, F_OK) == -1) {
+             return luaL_error(L, "file doesn't exist");    
+        }
         clang_parser *parser = new_clangparser(L);
         parser->idx = clang_createIndex(1, 0);
         const char *args[] = {file_name};
         parser->tu = clang_parseTranslationUnit(parser->idx, 0, args, 1, 0, 0, CXTranslationUnit_None);
+
         return 1;
 }
 
@@ -75,7 +80,7 @@ static inline CXCursor *new_CXCursor(lua_State *L)
 }
 
 /* Convert userdata type to CXCursor */
-static  CXCursor to_CXCursor(lua_State *L, int n) 
+static CXCursor to_CXCursor(lua_State *L, int n) 
 {
         CXCursor *c = (CXCursor*) luaL_checkudata(L, n, CURSOR_METATABLE);
         return *c;
