@@ -48,7 +48,6 @@ static int create_clangparser(lua_State *L)
         parser->idx = clang_createIndex(1, 0);
         const char *args[] = {file_name};
         parser->tu = clang_parseTranslationUnit(parser->idx, 0, args, 1, 0, 0, CXTranslationUnit_None);
-
         return 1;
 }
 
