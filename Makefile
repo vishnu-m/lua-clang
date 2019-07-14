@@ -4,13 +4,9 @@ LDFLAGS = $(shell llvm-config --ldflags)
 # Generate luaclang.so
 all: luaclang
 
-luaclang: src/luaclang.c
-	clang -I $(INCDIRS) $(LDFLAGS) src/luaclang.c -lclang -shared -fpic -o luaclang.so -Wall
-
-# Run all tests 
-test_all: src/luaclang.c
-	clang -I $(INCDIRS) $(LDFLAGS) src/luaclang.c -lclang -shared -fpic -o tests/luaclang.so -Wall
-	cd tests; bash test_all.sh
+luaclang: luaclang.c
+	clang -I $(INCDIRS) $(LDFLAGS) luaclang.c -lclang -shared -fpic -o luaclang.so -Wall
+	cp luaclang.so tests/
 
 # Remove luaclang.so
 clean:
