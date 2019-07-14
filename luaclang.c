@@ -32,7 +32,7 @@ typedef struct clang_parser {
                     2. https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html#ga2baf83f8c3299788234c8bce55e4472e
         Returns clang object whose translation unit cursor can be obtained.
 */
-static int create_clangparser(lua_State *L)
+static int clang_newparser(lua_State *L)
 {
         const char *file_name = lua_tostring(L, 1);
         if (access(file_name, F_OK) == -1) {
@@ -55,7 +55,7 @@ static int create_clangparser(lua_State *L)
                     2. https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html#ga2baf83f8c3299788234c8bce55e4472e
         Returns nothing
 */
-static int dispose_clangobject(lua_State *L)
+static int parser_dispose(lua_State *L)
 {
         clang_parser *parser;
         to_object(L, parser, PARSER_METATABLE, 1);
@@ -73,7 +73,7 @@ static int dispose_clangobject(lua_State *L)
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#gaec6e69127920785e74e4a517423f4391
         Returns
 */
-static int get_cursor(lua_State *L) 
+static int parser_getcursor(lua_State *L) 
 {
         clang_parser *parser;
         to_object(L, parser, PARSER_METATABLE, 1);
@@ -94,7 +94,7 @@ static int get_cursor(lua_State *L)
         Parameter - cur - Cursor whose name is to be obtained    
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#gaad1c9b2a1c5ef96cebdbc62f1671c763
 */
-static int get_cursor_spelling(lua_State *L) 
+static int cursor_getspelling(lua_State *L) 
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
@@ -114,19 +114,19 @@ void new_metatable(lua_State *L, const char *name, luaL_Reg *reg)
 }
 
 static luaL_Reg clang_functions[] = {
-        {"newParser", create_clangparser},
+        {"newParser", clang_newparser},
         {NULL, NULL}
 };
 
 static luaL_Reg parser_functions[] = {
-        {"disposeParser", dispose_clangobject},
-        {"getCursor", get_cursor},
-        {"__gc", dispose_clangobject},
+        {"dispose", parser_dispose},
+        {"getCursor", parser_getcursor},
+        {"__gc", parser_dispose},
         {NULL, NULL}
 };
 
 static luaL_Reg cursor_functions[] = {
-        {"getSpelling", get_cursor_spelling},
+        {"getSpelling", cursor_getspelling},
         {NULL, NULL}
 };
 

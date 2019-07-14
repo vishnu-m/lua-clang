@@ -6,7 +6,7 @@ all: luaclang
 
 luaclang: luaclang.c
 	clang -I $(INCDIRS) $(LDFLAGS) luaclang.c -lclang -shared -fpic -o luaclang.so -Wall
-	cp luaclang.so tests/
+	cp luaclang.so spec/
 
 # Remove luaclang.so
 clean:
