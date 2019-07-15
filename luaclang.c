@@ -71,7 +71,7 @@ static int parser_dispose(lua_State *L)
         Format - parser:getCursor()
         Parameter - parser - Clang object whose translation unit cursor is to be obtained 
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#gaec6e69127920785e74e4a517423f4391
-        Returns
+        Returns translation unit cursor
 */
 static int parser_getcursor(lua_State *L) 
 {
@@ -93,6 +93,7 @@ static int parser_getcursor(lua_State *L)
         Format - cur:getSpelling()
         Parameter - cur - Cursor whose name is to be obtained    
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#gaad1c9b2a1c5ef96cebdbc62f1671c763
+	Returns the name(spelling) of the entity represented by the cursor
 */
 static int cursor_getspelling(lua_State *L) 
 {
