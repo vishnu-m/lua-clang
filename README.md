@@ -1,3 +1,4 @@
+
 # lua-clang
 Lua binding for Libclang functions that are required to parse C declarations.
 
@@ -10,3 +11,10 @@ Create a loadable shared object file( `luaclang.so` ) with :
 Load this module in Lua by :
 
     lib = require "luaclang"
+
+Run tests
+
+ *In the root directory run -* 
+   
+
+     busted
