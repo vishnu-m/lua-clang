@@ -12,7 +12,7 @@ Load this module in Lua by :
 
     lib = require "luaclang"
 
-Run tests
+Run tests :
 
  *In the root directory run -* 
    
