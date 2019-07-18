@@ -195,7 +195,6 @@ static int cursor_visitchildren(lua_State *L)
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
         luaL_checktype(L, 2, LUA_TFUNCTION);
-        luaL_argcheck(L, lua_isfunction(L, 2) == 1, 1, "arg  is not a function");
         lua_remove(L, 1);       
         clang_visitChildren(*cur, visitor_function, L);
         if (lua_isstring(L, lua_gettop(L))) {
