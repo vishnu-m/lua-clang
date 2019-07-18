@@ -1,0 +1,1 @@
+enum items{item1, item2=7};
