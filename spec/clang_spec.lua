@@ -52,15 +52,15 @@ end)
 
 describe("visit children", function()
         it("returns continue", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 local expected = {
                                         {"outer", "spec/visit.c"},
                                         {"type", "spec/visit.c"}
                                  }
                 local children = {}
                 cur:visitChildren(function (cursor, parent)
-                        cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
+                        local cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
                         table.insert(children, {cur_spelling, par_spelling})
                         return "continue"
                 end)
@@ -68,14 +68,14 @@ describe("visit children", function()
         end)
 
         it("returns break", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 local expected = {
                                         {"outer", "spec/visit.c"}
                                  }
                 local children = {}
                 cur:visitChildren(function (cursor, parent)
-                        cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
+                        local cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
                         table.insert(children, {cur_spelling, par_spelling})
                         return "break"
                 end)
@@ -83,8 +83,8 @@ describe("visit children", function()
         end)
 
         it("returns recurse", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 local expected = {
                                         {"outer", "spec/visit.c"},
                                         {"first", "outer"},
@@ -100,7 +100,7 @@ describe("visit children", function()
                                  }
                 local children = {}
                 cur:visitChildren(function (cursor, parent)
-                        cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
+                        local cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
                         table.insert(children, {cur_spelling, par_spelling})
                         return "recurse"
                 end)
@@ -108,26 +108,36 @@ describe("visit children", function()
         end)
 
         it("throws an error with undefined return to visitor", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 assert.has.errors(function()
                         cur:visitChildren(function (cursor, parent) 
                                 return "unknown"
                         end)
-                end, "Undefined return to visitor")
+                end, "undefined return to visitor")
         end)
 
+        it("throws an error inside the callback function", function()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
+                assert.has.errors(function()
+                        cur:visitChildren(function (cursor, parent)
+                          error("myerror")
+                        end)
+                end, "spec/clang_spec.lua:125: myerror")
+        end)
+ 
         it("throws an error if argument supplied is not a function", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 assert.has.errors(function()
                         cur:visitChildren("not a function")
-                end, "calling 'visitChildren' on bad self (arg  is not a function)")
+                end, "bad argument #1 to 'visitChildren' (function expected, got string)")
         end)
 
         it("nested visit children", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 local expected = {
                                         {"outer", "spec/visit.c"},
                                         {"first", "outer"},
@@ -140,10 +150,10 @@ describe("visit children", function()
                                  }
                 local children = {}
                 cur:visitChildren(function (cursor, parent)
-                        cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
+                        local cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
                         table.insert(children, {cur_spelling, par_spelling})
                         cursor:visitChildren(function (cursor, parent)
-                                cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
+                                local cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
                                 table.insert(children, {cur_spelling, par_spelling})
                                 return "continue"
                         end)
@@ -155,8 +165,8 @@ end)
 
 describe("cursor kind", function()
         it("succeeds in getting the kind of cursor", function()
-                parser = luaclang.newParser("spec/visit.c")
-                cur = parser:getCursor()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
                 local expected = {
                         "StructDecl",
                         "EnumDecl"

@@ -106,34 +106,33 @@ static int cursor_getspelling(lua_State *L)
         return 1;
 }
 
-
 /* Return the cursor kind as a string */
 static const char *cursor_kind_str(enum CXCursorKind kind) 
 {
-    switch (kind) {
-        case CXCursor_StructDecl: 
-                return "StructDecl";
-        case CXCursor_UnionDecl: 
-                return "UnionDecl";
-        case CXCursor_EnumDecl: 
-                return "EnumDecl";
-        case CXCursor_FieldDecl: 
-                return "FieldDecl";
-        case CXCursor_EnumConstantDecl: 
-                return "EnumConstantDecl";
-        case CXCursor_FunctionDecl: 
-                return "FunctionDecl";
-        case CXCursor_VarDecl: 
-                return "VarDecl";
-        case CXCursor_ParmDecl: 
-                return "ParmDecl";
-        case CXCursor_TypedefDecl: 
-                return "TypedefDecl";
-        case CXCursor_IntegerLiteral: 
-                return "IntegerLiteral";
-        default: 
-                return "Unaddressed";
-    }
+        switch (kind) {
+                case CXCursor_StructDecl: 
+                        return "StructDecl";
+                case CXCursor_UnionDecl: 
+                        return "UnionDecl";
+                case CXCursor_EnumDecl: 
+                        return "EnumDecl";
+                case CXCursor_FieldDecl: 
+                        return "FieldDecl";
+                case CXCursor_EnumConstantDecl: 
+                        return "EnumConstantDecl";
+                case CXCursor_FunctionDecl: 
+                        return "FunctionDecl";
+                case CXCursor_VarDecl: 
+                        return "VarDecl";
+                case CXCursor_ParmDecl: 
+                        return "ParmDecl";
+                case CXCursor_TypedefDecl: 
+                        return "TypedefDecl";
+                case CXCursor_IntegerLiteral: 
+                        return "IntegerLiteral";
+                default: 
+                        return "Unaddressed";
+        }
 }
 
 /*      
@@ -149,13 +148,6 @@ static int cursor_getkind(lua_State *L)
         return 1;
 }
 
-/* 
-        Visitor function for visit_children
-        A value of this enumeration type should be returned by this functionr to indicate how visit_children proceed : 
-                1. CXChildVisit_Break - Terminates the cursor traversal 
-                2. CXChildVisit_Continue - Continues the cursor traversal with the next sibling of the cursor just visited, without visiting its children.
-                3. CXChildVisit_Recurse - Recursively traverse the children of this cursor, using the same visitor and client data.
- */
 enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
         lua_State *L = (lua_State*) client_data;
@@ -167,8 +159,6 @@ enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXCli
         new_object(L, par, CURSOR_METATABLE);
         *par = parent;
         if (lua_pcall(L, 2, 1, 0) != 0) {
-                lua_settop(L, 0);
-                lua_pushstring(L, "Function call unsuccessfull");
                 return CXChildVisit_Break;
         }
         const char *result = lua_tostring(L, -1);
@@ -185,22 +175,26 @@ enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXCli
                 return CXChildVisit_Break;
         }
         else {
-                lua_settop(L, 0);
-                lua_pushstring(L, "Undefined return to visitor");
+                lua_pushstring(L, "undefined return to visitor");
                 return CXChildVisit_Break;
         }
 }
 
 /*      
         Format - cur:visitChildren(visitor_function)
-        Parameter - cur - Cursor whose children are to be visited   
+        Parameter - cur - Cursor whose children are to be visited  
+        A string should be returned by the visitor_function to indicate how visit_children should proceed : 
+                1. "break" - Terminates the cursor traversal 
+                2. "continue" - Continues the cursor traversal with the next sibling of the cursor just visited, without visiting its children
+                3. "recurse" - Recursively traverse the children of this cursor, using the same visitor and client data
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__TRAVERSAL.html#ga5d0a813d937e1a7dcc35f206ad1f7a91
         Returns nothing
 */
-static int visit_children(lua_State *L)                               
+static int cursor_visitchildren(lua_State *L)                               
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_checktype(L, 2, LUA_TFUNCTION);
         luaL_argcheck(L, lua_isfunction(L, 2) == 1, 1, "arg  is not a function");
         lua_remove(L, 1);       
         clang_visitChildren(*cur, visitor_function, L);
@@ -235,7 +229,7 @@ static luaL_Reg parser_functions[] = {
 static luaL_Reg cursor_functions[] = {
         {"getSpelling", cursor_getspelling},
         {"getKind", cursor_getkind},
-        {"visitChildren", visit_children},
+        {"visitChildren", cursor_visitchildren},
         {NULL, NULL}
 };
 

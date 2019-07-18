@@ -6,4 +6,3 @@ struct outer {
 };
 
 enum type{Integer, Float, String};
-
