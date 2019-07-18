@@ -424,7 +424,7 @@ static luaL_Reg cursor_functions[] = {
         {NULL, NULL}
 };
 
-static luaL_Reg type_function[] = {
+static luaL_Reg type_functions[] = {
         {"getTypeSpelling", type_getspelling}, 
         {"getResultType", type_getresult}, 
         {"getArgType", type_getarg}, 
@@ -444,7 +444,7 @@ int luaopen_luaclang(lua_State *L)
 {
         new_metatable(L, PARSER_METATABLE, parser_functions);
         new_metatable(L, CURSOR_METATABLE, cursor_functions);
-        new_metatable(L, TYPE_METATABLE, type_function);
+        new_metatable(L, TYPE_METATABLE, type_functions);
 
         lua_newtable(L);
         luaL_setfuncs(L, clang_functions, 0);
