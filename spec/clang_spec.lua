@@ -328,4 +328,3 @@ describe("get typedef underlying type", function()
                 assert.are.equal(underlying_type_str, "GROUP *")
         end)
 end)
-
