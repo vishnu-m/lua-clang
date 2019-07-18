@@ -431,12 +431,9 @@ static luaL_Reg type_function[] = {
         {NULL, NULL}
 };
 
-void reg_metafuncs(lua_State *L, const char *name, luaL_Reg *reg)
+void new_metatable(lua_State *L, const char *name, luaL_Reg *reg)
 {
-        if(!luaL_newmetatable(L, name)) 
-                luaL_getmetatable(L, name);
-        else 
-                luaL_newmetatable(L, name);
+        luaL_newmetatable(L, name);
         lua_pushvalue(L, -1);
         lua_setfield(L, -2, "__index");
         luaL_setfuncs(L, reg, 0);
@@ -445,13 +442,9 @@ void reg_metafuncs(lua_State *L, const char *name, luaL_Reg *reg)
 
 int luaopen_luaclang(lua_State *L) 
 {
-        reg_metafuncs(L, PARSER_METATABLE, parser_functions);
-        reg_metafuncs(L, CURSOR_METATABLE, cursor_functions);
-
-        luaL_newmetatable(L, TYPE_METATABLE);
-        reg_metafuncs(L, TYPE_METATABLE, type_function);
-        lua_pushvalue(L, -1);
-        lua_setfield(L, -2, "__index");
+        new_metatable(L, PARSER_METATABLE, parser_functions);
+        new_metatable(L, CURSOR_METATABLE, cursor_functions);
+        new_metatable(L, TYPE_METATABLE, type_function);
 
         lua_newtable(L);
         luaL_setfuncs(L, clang_functions, 0);
