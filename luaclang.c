@@ -158,7 +158,6 @@ static int cursor_gettype(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
-        luaL_argcheck(L, !clang_Cursor_isNull(*cur), 1, "Invalid cursor");
         CXType *cur_type;
         new_object(L, cur_type, TYPE_METATABLE);
         *cur_type = clang_getCursorType(*cur);
@@ -390,7 +389,7 @@ static int type_getarg(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
-        unsigned int index = lua_tonumber(L, 2);
+        unsigned int index = luaL_checknumber(L, 2);
         CXType *arg_type;
         new_object(L, arg_type, TYPE_METATABLE);
         *arg_type = clang_getArgType(*type, index);
