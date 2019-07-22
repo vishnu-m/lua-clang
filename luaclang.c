@@ -174,6 +174,7 @@ static int cursor_getnumargs(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FunctionDecl, 1, "expect cursor with function kind");
         int num_args = clang_Cursor_getNumArguments(*cur);
         lua_pushnumber(L, num_args);
         return 1;
@@ -189,6 +190,7 @@ static int cursor_isinlined(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FunctionDecl, 1, "expect cursor with function kind");
         CINDEX_LINKAGE bool is_inline;
         is_inline = clang_Cursor_isFunctionInlined(*cur);
         lua_pushboolean(L, is_inline);
@@ -205,6 +207,7 @@ static int cursor_getenumvalue(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_EnumConstantDecl, 1, "expect cursor with enum constant kind");
         int enum_value = clang_getEnumConstantDeclValue(*cur);
         lua_pushinteger(L, enum_value);
         return 1;
@@ -252,6 +255,7 @@ static int cursor_isbitfield(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FieldDecl, 1, "expect cursor with struct/union field kind");
         bool is_bitfield = clang_Cursor_isBitField(*cur);
         lua_pushboolean(L, is_bitfield);
         return 1;
@@ -267,6 +271,7 @@ static int cursor_getbitfield_width(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_Cursor_isBitField(*cur), 1, "expect cursor with struct/union field kind that is a bit field");
         int bitfield_width = clang_getFieldDeclBitWidth(*cur);
         lua_pushinteger(L, bitfield_width);
         return 1;
@@ -282,6 +287,7 @@ static int cursor_gettypdef_underlying(lua_State *L)
 {
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_TypedefDecl, 1, "expect cursor with typedef kind");
         CXType *underlying_type;
         new_object(L, underlying_type, TYPE_METATABLE);
         *underlying_type = clang_getTypedefDeclUnderlyingType(*cur);
@@ -372,6 +378,7 @@ static int type_getresult(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
         CXType *result_type;
         new_object(L, result_type, TYPE_METATABLE);
         *result_type = clang_getResultType(*type);
@@ -389,6 +396,7 @@ static int type_getarg(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
         unsigned int index = luaL_checknumber(L, 2);
         CXType *arg_type;
         new_object(L, arg_type, TYPE_METATABLE);
@@ -418,13 +426,13 @@ static luaL_Reg cursor_functions[] = {
         {"getEnumValue", cursor_getenumvalue}, 
         {"getStorageClass", cursor_getstorageclass}, 
         {"isBitField", cursor_isbitfield},
-        {"getBitFieldWidth" ,cursor_getbitfield_width},
+        {"getBitFieldWidth", cursor_getbitfield_width},
         {"getTypedefUnderlyingType", cursor_gettypdef_underlying},
         {NULL, NULL}
 };
 
 static luaL_Reg type_functions[] = {
-        {"getTypeSpelling", type_getspelling}, 
+        {"getSpelling", type_getspelling}, 
         {"getResultType", type_getresult}, 
         {"getArgType", type_getarg}, 
         {NULL, NULL}
