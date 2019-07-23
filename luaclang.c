@@ -148,6 +148,152 @@ static int cursor_getkind(lua_State *L)
         return 1;
 }
 
+/*
+        Format - cur:getType()
+        Parameter - cur - Cursor whose type is to be obtained    
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#gaae5702661bb1f2f93038051737de20f4
+        Returns the type of the cursor
+*/
+static int cursor_gettype(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        CXType *cur_type;
+        new_object(L, cur_type, TYPE_METATABLE);
+        *cur_type = clang_getCursorType(*cur);
+        return 1;
+}
+
+/*      
+        Format - cur:getNumArgs()
+        Parameter - cur - Cursor which represents a function
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga5254f761b57fd78de3ac9c6bfcaa7fed
+        Returns the number of non-variadic arguments in the function is to be obtained
+*/
+static int cursor_getnumargs(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FunctionDecl, 1, "expect cursor with function kind");
+        int num_args = clang_Cursor_getNumArguments(*cur);
+        lua_pushnumber(L, num_args);
+        return 1;
+}
+
+/*      
+        Format - cur:isFunctionInline()
+        Parameter - cur - Cursor which is to be checked (whether the FunctionDecl 'cur' represents is inline)
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga5254f761b57fd78de3ac9c6bfcaa7fed
+        Returns 'true' if the function is inlined , 'false' otherwise
+*/
+static int cursor_isinlined(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FunctionDecl, 1, "expect cursor with function kind");
+        CINDEX_LINKAGE bool is_inline;
+        is_inline = clang_Cursor_isFunctionInlined(*cur);
+        lua_pushboolean(L, is_inline);
+        return 1;
+}
+
+/*      
+        Format - cur:getEnumValue()
+        Parameter - cur - Cursor which represents an EnumConstantDecl whose integer value is to be obtained
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga6b8585818420e7512feb4c9d209b4f4d
+        Returns the integer value corresponding to the EnumConstantDecl
+*/
+static int cursor_getenumvalue(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_EnumConstantDecl, 1, "expect cursor with enum constant kind");
+        int enum_value = clang_getEnumConstantDeclValue(*cur);
+        lua_pushinteger(L, enum_value);
+        return 1;
+}
+
+/* Retrieve the storage class specifier string */
+static const char *storage_class_str(enum CX_StorageClass sc_specifier) 
+{
+        switch (sc_specifier) {
+                case CX_SC_Extern:
+                        return "extern";
+                case CX_SC_Static:
+                        return "static";
+                case CX_SC_Auto:
+                        return "auto";
+                case CX_SC_Register:
+                        return "register";
+                default:
+                        return "unknown";
+        }
+}
+
+/*
+        Format - cur:getStorageClass()
+        Parameter - cur -Cursor whose storage class specifier is to be obtained
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga230c7904f3878469d772f3e464b9c83d
+        Returns the storage class specifier string
+*/
+static int cursor_getstorageclass(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        enum CX_StorageClass sc_specifier = clang_Cursor_getStorageClass(*cur);
+        lua_pushstring(L, storage_class_str(sc_specifier));
+        return 1;
+}
+
+/*
+        Format - cur:isBitField()
+        Parameter - cur -Cursor to be checked
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga750705f6b418b25ca00495b7392c740d
+        Returns 'truee if the cursor represents a bitfield; 'false' otherwise
+*/
+static int cursor_isbitfield(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FieldDecl, 1, "expect cursor with struct/union field kind");
+        bool is_bitfield = clang_Cursor_isBitField(*cur);
+        lua_pushboolean(L, is_bitfield);
+        return 1;
+}
+
+/*
+        Format - cur:getBitFieldWidth()
+        Parameter - cur - Cursor which represents the bitfield
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga80bbb872dde5b2f26964081338108f91
+        Returns the bit width of a bit field declaration as an integer
+*/
+static int cursor_getbitfield_width(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_Cursor_isBitField(*cur), 1, "expect cursor with struct/union field kind that is a bit field");
+        int bitfield_width = clang_getFieldDeclBitWidth(*cur);
+        lua_pushinteger(L, bitfield_width);
+        return 1;
+}
+
+/*
+        Format - cur:getTypedefUnderlyingType()
+        Parameter - cur - Cursor which represents the TypedefDecl
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga8de899fc18dc859b6fe3b97309f4fd52
+        Returns the Underlying type of a TypedefDecl
+*/
+static int cursor_gettypdef_underlying(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_TypedefDecl, 1, "expect cursor with typedef kind");
+        CXType *underlying_type;
+        new_object(L, underlying_type, TYPE_METATABLE);
+        *underlying_type = clang_getTypedefDeclUnderlyingType(*cur);
+        return 1;
+}
+
 enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
         lua_State *L = (lua_State*) client_data;
@@ -204,13 +350,58 @@ static int cursor_visitchildren(lua_State *L)
         return 0;
 }
 
-void new_metatable(lua_State *L, const char *name, luaL_Reg *reg)
+/* -- Type functions -- */
+
+/*
+        Format - cur_type:getTypeSpelling()
+        Parameter - cur_type - Cursor type whose spelling is to be printed  
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#gac9d37f61bede521d4f42a6553bcbc09f
+        Returns the spelling of the cursor type
+*/
+static int type_getspelling(lua_State *L)
 {
-        luaL_newmetatable(L, name);
-        lua_pushvalue(L, -1);
-        lua_setfield(L, -2, "__index");
-        luaL_setfuncs(L, reg, 0);
-        lua_pop(L, 1);
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        CXString type_str = clang_getTypeSpelling(*type);
+        lua_pushstring(L, clang_getCString(type_str));
+        clang_disposeString(type_str);
+        return 1; 
+}
+
+/*
+        Format - cur_type:getResultType()
+        Parameter - cur_type - Cursor type which is that of a function, whose return type is to be printed 
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#gac9d37f61bede521d4f42a6553bcbc09f
+        Returns the return type associated with a function type
+*/
+static int type_getresult(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
+        CXType *result_type;
+        new_object(L, result_type, TYPE_METATABLE);
+        *result_type = clang_getResultType(*type);
+        return 1;
+}
+
+/*
+        Format - cur_type:getArgType(idx)
+        Parameters - cur_type - Cursor type of the function 
+                   - idx - parameter index (starting from 0)
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga67f60ba4831b1bfd90ab0c1c12adab27
+        Returns the type of the parameter at index 'idx' in the function 
+*/
+static int type_getarg(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
+        unsigned int index = luaL_checkinteger(L, 2);
+        CXType *arg_type;
+        new_object(L, arg_type, TYPE_METATABLE);
+        *arg_type = clang_getArgType(*type, index);
+        return 1;
 }
 
 static luaL_Reg clang_functions[] = {
@@ -226,16 +417,42 @@ static luaL_Reg parser_functions[] = {
 };
 
 static luaL_Reg cursor_functions[] = {
-        {"getSpelling", cursor_getspelling},
-        {"getKind", cursor_getkind},
-        {"visitChildren", cursor_visitchildren},
+        {"getSpelling", cursor_getspelling}, 
+        {"getKind", cursor_getkind}, 
+        {"visitChildren", cursor_visitchildren}, 
+        {"getType", cursor_gettype}, 
+        {"getNumArgs", cursor_getnumargs}, 
+        {"isFunctionInlined", cursor_isinlined},
+        {"getEnumValue", cursor_getenumvalue}, 
+        {"getStorageClass", cursor_getstorageclass}, 
+        {"isBitField", cursor_isbitfield},
+        {"getBitFieldWidth", cursor_getbitfield_width},
+        {"getTypedefUnderlyingType", cursor_gettypdef_underlying},
         {NULL, NULL}
 };
+
+static luaL_Reg type_functions[] = {
+        {"getSpelling", type_getspelling}, 
+        {"getResultType", type_getresult}, 
+        {"getArgType", type_getarg}, 
+        {NULL, NULL}
+};
+
+void new_metatable(lua_State *L, const char *name, luaL_Reg *reg)
+{
+        luaL_newmetatable(L, name);
+        lua_pushvalue(L, -1);
+        lua_setfield(L, -2, "__index");
+        luaL_setfuncs(L, reg, 0);
+        lua_pop(L, 1);
+}
 
 int luaopen_luaclang(lua_State *L) 
 {
         new_metatable(L, PARSER_METATABLE, parser_functions);
         new_metatable(L, CURSOR_METATABLE, cursor_functions);
+        new_metatable(L, TYPE_METATABLE, type_functions);
+
         lua_newtable(L);
         luaL_setfuncs(L, clang_functions, 0);
         return 1;
