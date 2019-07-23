@@ -397,7 +397,7 @@ static int type_getarg(lua_State *L)
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
         luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
-        unsigned int index = luaL_checknumber(L, 2);
+        unsigned int index = luaL_checkinteger(L, 2);
         CXType *arg_type;
         new_object(L, arg_type, TYPE_METATABLE);
         *arg_type = clang_getArgType(*type, index);
