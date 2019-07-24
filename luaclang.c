@@ -50,7 +50,7 @@ static int clang_newparser(lua_State *L)
 }
 
 /*      
-        Format - parser:disposeParser()
+        Format - parser:dispose()
         Parameter - parser - Clang object to be disposed
         More info - 1. https://clang.llvm.org/doxygen/group__CINDEX.html#ga51eb9b38c18743bf2d824c6230e61f93
                     2. https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html#ga2baf83f8c3299788234c8bce55e4472e
