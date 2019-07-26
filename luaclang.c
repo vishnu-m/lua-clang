@@ -252,7 +252,6 @@ static int cursor_getstorageclass(lua_State *L)
         const char *sc_specifier_str = storage_class_str(sc_specifier);
         if(sc_specifier_str == NULL)
                 luaL_error(L, "lua-clang: %s: unknown case %d", __func__, sc_specifier);
-        
         else
                 lua_pushstring(L, storage_class_str(sc_specifier));
         return 1;
