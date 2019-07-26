@@ -180,6 +180,25 @@ static int cursor_getnumargs(lua_State *L)
         return 1;
 }
 
+/*
+        Format - cur:getArgCursor(idx)
+        Parameters - cur - Cursor representing the function declaration 
+                   - idx - parameter index (starting from 0)
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga673c5529d33eedd0b78aca5ac6fc1d7c
+        Returns the cursor of the parameter at index 'idx' in the function 
+*/
+static int cursor_getarg(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FunctionDecl, 1, "expect cursor with function kind");
+        unsigned int index = luaL_checkinteger(L, 2);
+        CXCursor *arg_cur;
+        new_object(L, arg_cur, CURSOR_METATABLE);
+        *arg_cur = clang_Cursor_getArgument(*cur, index);
+        return 1;
+}
+
 /*      
         Format - cur:isFunctionInline()
         Parameter - cur - Cursor which is to be checked (whether the FunctionDecl 'cur' represents is inline)
@@ -362,6 +381,7 @@ static int cursor_visitchildren(lua_State *L)
         return 0;
 }
 
+
 /* -- Type functions -- */
 
 /*
@@ -434,6 +454,7 @@ static luaL_Reg cursor_functions[] = {
         {"visitChildren", cursor_visitchildren}, 
         {"getType", cursor_gettype}, 
         {"getNumArgs", cursor_getnumargs}, 
+        {"getArgCursor", cursor_getarg},
         {"isFunctionInlined", cursor_isinlined},
         {"getEnumValue", cursor_getenumvalue}, 
         {"getStorageClass", cursor_getstorageclass}, 
