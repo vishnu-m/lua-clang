@@ -193,6 +193,7 @@ static int cursor_getarg(lua_State *L)
         to_object(L, cur, CURSOR_METATABLE, 1);
         luaL_argcheck(L, clang_getCursorKind(*cur) == CXCursor_FunctionDecl, 1, "expect cursor with function kind");
         unsigned int index = luaL_checkinteger(L, 2);
+        luaL_argcheck(L, index < clang_Cursor_getNumArguments(*cur), 1, "argument index out of bounds");
         CXCursor *arg_cur;
         new_object(L, arg_cur, CURSOR_METATABLE);
         *arg_cur = clang_Cursor_getArgument(*cur, index);
