@@ -217,16 +217,24 @@ static int cursor_getenumvalue(lua_State *L)
 static const char *storage_class_str(enum CX_StorageClass sc_specifier) 
 {
         switch (sc_specifier) {
+                case CX_SC_Invalid:
+                        return "invalid";
+                case CX_SC_None:
+                        return "none";
                 case CX_SC_Extern:
                         return "extern";
                 case CX_SC_Static:
                         return "static";
+                case CX_SC_PrivateExtern:
+                        return "private extern";
+                case CX_SC_OpenCLWorkGroupLocal:
+                        return "opencl workgroup local";
                 case CX_SC_Auto:
                         return "auto";
                 case CX_SC_Register:
                         return "register";
                 default:
-                        return "unknown";
+                        return NULL;
         }
 }
 
@@ -241,7 +249,12 @@ static int cursor_getstorageclass(lua_State *L)
         CXCursor *cur;
         to_object(L, cur, CURSOR_METATABLE, 1);
         enum CX_StorageClass sc_specifier = clang_Cursor_getStorageClass(*cur);
-        lua_pushstring(L, storage_class_str(sc_specifier));
+        const char *sc_specifier_str = storage_class_str(sc_specifier);
+        if(sc_specifier_str == NULL)
+                luaL_error(L, "lua-clang: %s: unknown case %d", __func__, sc_specifier);
+        
+        else
+                lua_pushstring(L, storage_class_str(sc_specifier));
         return 1;
 }
 
