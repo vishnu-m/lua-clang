@@ -329,7 +329,7 @@ static int cursor_gettypdef_underlying(lua_State *L)
 enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
         lua_State *L = (lua_State*) client_data;
-        int nargs =  lua_gettop(L);
+        int nargs = lua_gettop(L);
         lua_pushvalue(L, 1);    
         CXCursor *cur;
         new_object(L, cur, CURSOR_METATABLE);           
