@@ -160,6 +160,22 @@ describe("cursor:visitChildren()", function()
                 end )
                 assert.are.same(expected, children)     
         end)
+
+        it("uses extra params", function()
+                local parser = luaclang.newParser("spec/visit.c")
+                local cur = parser:getCursor()
+                local expected = {
+                                        {"outer", "spec/visit.c"},
+                                        {"type", "spec/visit.c"}
+                                 }
+                local children = {}
+                cur:visitChildren(function (cursor, parent, children)
+                        local cur_spelling, par_spelling = cursor:getSpelling(), parent:getSpelling()
+                        table.insert(children, {cur_spelling, par_spelling})
+                        return "continue"
+                end, children)
+                assert.are.same(expected, children)
+        end)
 end)
 
 describe("cursor:getKind()", function()
