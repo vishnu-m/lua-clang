@@ -337,7 +337,7 @@ enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXCli
         CXCursor *par;
         new_object(L, par, CURSOR_METATABLE);
         *par = parent;
-        lua_checkstack(L, nargs);
+        lua_checkstack(L, nargs-1);
         for(int i=2; i <= nargs; i++) {
                 lua_pushvalue(L, i);
         }
