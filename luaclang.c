@@ -331,7 +331,7 @@ enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXCli
         lua_State *L = (lua_State*) client_data;
         int nargs =  lua_gettop(L);
         if (!lua_checkstack(L, nargs+2))
-                luaL_error(L, "excessive number of  params");
+                luaL_error(L, "excessive number of params");
         lua_pushvalue(L, 1);    
         CXCursor *cur;
         new_object(L, cur, CURSOR_METATABLE);           
