@@ -183,7 +183,7 @@ static int cursor_getnumargs(lua_State *L)
 /*
         Format - cur:getArgCursor(idx)
         Parameters - cur - Cursor representing the function declaration 
-                   - idx - parameter index (starting from 0)
+                   - idx - parameter index (starting from 1)
         More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga673c5529d33eedd0b78aca5ac6fc1d7c
         Returns the cursor of the parameter at index 'idx' in the function 
 */
@@ -196,7 +196,7 @@ static int cursor_getarg(lua_State *L)
         luaL_argcheck(L, index < clang_Cursor_getNumArguments(*cur), 1, "argument index out of bounds");
         CXCursor *arg_cur;
         new_object(L, arg_cur, CURSOR_METATABLE);
-        *arg_cur = clang_Cursor_getArgument(*cur, index);
+        *arg_cur = clang_Cursor_getArgument(*cur, index-1);
         return 1;
 }
 
@@ -427,7 +427,7 @@ static int type_getresult(lua_State *L)
 /*
         Format - cur_type:getArgType(idx)
         Parameters - cur_type - Cursor type of the function 
-                   - idx - parameter index (starting from 0)
+                   - idx - parameter index (starting from 1)
         More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga67f60ba4831b1bfd90ab0c1c12adab27
         Returns the type of the parameter at index 'idx' in the function 
 */
@@ -439,7 +439,7 @@ static int type_getarg(lua_State *L)
         unsigned int index = luaL_checkinteger(L, 2);
         CXType *arg_type;
         new_object(L, arg_type, TYPE_METATABLE);
-        *arg_type = clang_getArgType(*type, index);
+        *arg_type = clang_getArgType(*type, index-1);
         return 1;
 }
 
