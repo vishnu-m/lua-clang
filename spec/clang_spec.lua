@@ -307,10 +307,10 @@ describe("cursor:getArgCursor()", function()
                 cursor = get_last_child(cursor)
                 local arg_cursor
                 assert.has_no.errors(function()
-                        arg_cursor = cursor:getArgCursor(1)
+                        arg_cursor = cursor:getArgCursor(2)
                 end)
                 local arg_cursor_str = arg_cursor:getSpelling()
-                assert.are.equals(arg_cursor_str, "a")
+                assert.are.equals(arg_cursor_str, "b")
         end)
 
         it("uses a non-integer as index value", function()
