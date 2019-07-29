@@ -281,7 +281,7 @@ static int cursor_getstorageclass(lua_State *L)
         Format - cur:isBitField()
         Parameter - cur -Cursor to be checked
         More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga750705f6b418b25ca00495b7392c740d
-        Returns 'truee if the cursor represents a bitfield; 'false' otherwise
+        Returns 'true if the cursor represents a bitfield; 'false' otherwise
 */
 static int cursor_isbitfield(lua_State *L)
 {
