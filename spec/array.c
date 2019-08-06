@@ -1,0 +1,1 @@
+int constant[10];

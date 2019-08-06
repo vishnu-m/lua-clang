@@ -435,11 +435,61 @@ static int type_getarg(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
-        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect type object with function kind");
         unsigned int index = luaL_checkinteger(L, 2);
         CXType *arg_type;
         new_object(L, arg_type, TYPE_METATABLE);
         *arg_type = clang_getArgType(*type, index-1);
+        return 1;
+}
+
+/*
+        Format - cur_type:getArrayElementType()
+        Parameter - cur_type - Cursor type of the function whose kind is an array
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga718591f4b07d9d4861557a3ed8b29713
+        Returns the type of the array
+*/
+static int type_getarrtype(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_ConstantArray || type->kind == CXType_VariableArray || type->kind == CXType_IncompleteArray || type->kind == CXType_DependentSizedArray, 1, "expect type object with array kind");
+        CXType *arr_type;
+        new_object(L, arr_type, TYPE_METATABLE);
+        *arr_type = clang_getArrayElementType(*type);
+        return 1;
+}
+
+/*
+        Format - cur_type:getArraySize()
+        Parameter - cur_type - Cursor type of the function  whose kind is a constant array
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga91521260817054f153b5f1295056192d
+        Returns the size of the constant array
+*/
+static int type_getarrsize(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_ConstantArray, 1, "expect type object with array kind");
+        long long size = clang_getArraySize(*type);
+        lua_pushnumber(L, size);
+        return 1;
+}
+
+/*
+        Format - cur_type:getPointeeType()
+        Parameter - cur_type - Cursor type of the function whose kind is a pointer
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#gaafa3eb34932d8da1358d50ed949ff3ee
+        Returns the type of the pointee
+*/
+static int type_getpointee_type(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_Pointer, 1, "expect type object with pointer kind");
+        CXType *pointee_type;
+        new_object(L, pointee_type, TYPE_METATABLE);
+        *pointee_type = clang_getPointeeType(*type);
         return 1;
 }
 
@@ -474,7 +524,10 @@ static luaL_Reg cursor_functions[] = {
 static luaL_Reg type_functions[] = {
         {"getSpelling", type_getspelling}, 
         {"getResultType", type_getresult}, 
-        {"getArgType", type_getarg}, 
+        {"getArgType", type_getarg},
+        {"getArrayElementType", type_getarrtype}, 
+        {"getArraySize", type_getarrsize},
+        {"getPointeeType", type_getpointee_type},
         {NULL, NULL}
 };
 
