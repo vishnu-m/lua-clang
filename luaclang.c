@@ -493,6 +493,38 @@ static int type_getpointee_type(lua_State *L)
         return 1;
 }
 
+static const char *cursor_typekind_str(enum CXTypeKind type_kind) 
+{
+        switch (type_kind) {
+                case CXType_ConstantArray: 
+                        return "ConstantArray";
+                case CXType_VariableArray: 
+                        return "VariableArray";
+                case CXType_IncompleteArray: 
+                        return "IncompleteArray";
+                case CXType_DependentSizedArray: 
+                        return "DependentSizedArray";
+                case CXType_Pointer: 
+                        return "Pointer";
+                default: 
+                        return "Unaddressed";
+        }
+}
+
+/*
+        Format - cur_type:getTypeKind()
+        Parameter - cur_type - Cursor type whose type kind is to be found
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#gaad39de597b13a18882c21860f92b095a
+        Returns the type kind of the type object
+*/
+static int type_gettypekind(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        lua_pushstring(L, cursor_typekind_str(type->kind));
+        return 1;
+}
+
 static luaL_Reg clang_functions[] = {
         {"newParser", clang_newparser},
         {NULL, NULL}
@@ -528,6 +560,7 @@ static luaL_Reg type_functions[] = {
         {"getArrayElementType", type_getarrtype}, 
         {"getArraySize", type_getarrsize},
         {"getPointeeType", type_getpointee_type},
+        {"getTypeKind", type_gettypekind},
         {NULL, NULL}
 };
 
