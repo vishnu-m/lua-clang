@@ -444,7 +444,7 @@ static int type_getarg(lua_State *L)
 }
 
 /*
-        Format - cur_type:getArrayType()
+        Format - cur_type:getArrayElementType()
         Parameter - cur_type - Cursor type of the function whose kind is an array
         More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga718591f4b07d9d4861557a3ed8b29713
         Returns the type of the array
@@ -525,7 +525,7 @@ static luaL_Reg type_functions[] = {
         {"getSpelling", type_getspelling}, 
         {"getResultType", type_getresult}, 
         {"getArgType", type_getarg},
-        {"getArrayType", type_getarrtype}, 
+        {"getArrayElementType", type_getarrtype}, 
         {"getArraySize", type_getarrsize},
         {"getPointeeType", type_getpointee_type},
         {NULL, NULL}
