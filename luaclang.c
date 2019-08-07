@@ -493,26 +493,6 @@ static int type_getpointee_type(lua_State *L)
         return 1;
 }
 
-static const char *cursor_typekind_str(enum CXTypeKind type_kind) 
-{
-        switch (type_kind) {
-                case CXType_ConstantArray: 
-                        return "ConstantArray";
-                case CXType_VariableArray: 
-                        return "VariableArray";
-                case CXType_IncompleteArray: 
-                        return "IncompleteArray";
-                case CXType_DependentSizedArray: 
-                        return "DependentSizedArray";
-                case CXType_Pointer: 
-                        return "Pointer";
-                case CXType_FunctionProto:
-                        return "FunctionProto";
-                default: 
-                        return "Unaddressed";
-        }
-}
-
 /*
         Format - cur_type:getTypeKind()
         Parameter - cur_type - Cursor type whose type kind is to be found
@@ -523,7 +503,7 @@ static int type_gettypekind(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
-        lua_pushstring(L, cursor_typekind_str(type->kind));
+        lua_pushstring(L, clang_getCString(clang_getTypeKindSpelling(type->kind)));
         return 1;
 }
 
