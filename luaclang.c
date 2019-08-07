@@ -506,6 +506,8 @@ static const char *cursor_typekind_str(enum CXTypeKind type_kind)
                         return "DependentSizedArray";
                 case CXType_Pointer: 
                         return "Pointer";
+                case CXType_FunctionProto:
+                        return "FunctionProto";
                 default: 
                         return "Unaddressed";
         }
