@@ -417,7 +417,7 @@ static int type_getresult(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
-        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect cursor with function kind");
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect type object with function kind");
         CXType *result_type;
         new_object(L, result_type, TYPE_METATABLE);
         *result_type = clang_getResultType(*type);
@@ -493,6 +493,7 @@ static int type_getpointee_type(lua_State *L)
         return 1;
 }
 
+
 /*
         Format - cur_type:getTypeKind()
         Parameter - cur_type - Cursor type whose type kind is to be found
@@ -504,6 +505,22 @@ static int type_gettypekind(lua_State *L)
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
         lua_pushstring(L, clang_getCString(clang_getTypeKindSpelling(type->kind)));
+        return 1;
+}
+
+/*
+        Format - cur_type:getNumArgTypes()
+        Parameter - cur_type - Cursor type which has FunctionProto kind 
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga705e1a4ed7c7595606fc30ed5d2a6b5a
+        Returns the number of arguments
+ */
+static int type_getnumargtypes(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        luaL_argcheck(L, type->kind == CXType_FunctionProto, 1, "expect type object with function kind");
+        int num_args = clang_getNumArgTypes(*type);
+        lua_pushnumber(L, num_args);
         return 1;
 }
 
@@ -543,6 +560,7 @@ static luaL_Reg type_functions[] = {
         {"getArraySize", type_getarrsize},
         {"getPointeeType", type_getpointee_type},
         {"getTypeKind", type_gettypekind},
+        {"getNumArgTypes", type_getnumargtypes},    
         {NULL, NULL}
 };
 
