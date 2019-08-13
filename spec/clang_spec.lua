@@ -432,6 +432,30 @@ describe("cursor:getTypedefUnderlyingType()", function()
         end)
 end)
 
+describe("cur1:equalCursors(cur2)", function()
+        it("returns true for equal cursors", function()
+                local parser = luaclang.newParser("spec/struct.c")
+                local cursor = parser:getCursor()   
+                local tu_cursor
+                cursor:visitChildren(function(cursor, parent)
+                        tu_cursor = parent
+                        return "break"
+                end)
+                assert.are.same(true, tu_cursor:equalCursors(cursor))
+        end)
+
+        it("returns false for unequal cursors", function()
+                local parser = luaclang.newParser("spec/struct.c")
+                local cursor = parser:getCursor()   
+                local first_decl
+                cursor:visitChildren(function(cursor, parent)
+                        first_decl = cursor
+                        return "break"
+                end)
+                assert.are.same(false, first_decl:equalCursors(cursor))
+        end)
+end)
+
 --Type functions
 
 describe("cursor:getType()", function() 
@@ -630,4 +654,20 @@ describe("cursor_type:getNumArgTypes()", function()
                 end, "calling 'getNumArgTypes' on bad self (expect type object with function kind)")
                 parser:dispose()
         end)
+end)
+
+describe("cursor_type:getTypeDeclaration()", function() 
+        it("obtains the cursor", function() 
+                local parser = luaclang.newParser("spec/typedecl.c")
+                local cursor = parser:getCursor()  
+                local struct_decl
+                cursor:visitChildren(function (cursor, parent)
+                        struct_decl = cursor
+                        return "break"
+                end)
+                cursor = get_last_child(cursor)
+                local cursor_type = cursor:getTypedefUnderlyingType()
+                local type_decl = cursor_type:getTypeDeclaration() 
+                assert.are.same(true, struct_decl:equalCursors(type_decl))    
+        end)       
 end)
