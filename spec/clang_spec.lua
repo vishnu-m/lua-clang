@@ -432,6 +432,25 @@ describe("cursor:getTypedefUnderlyingType()", function()
         end)
 end)
 
+describe("cur1:equals(cur2)", function()
+        it("returns true for equal cursors", function()
+                local parser = luaclang.newParser("spec/struct.c")
+                local c1, c2 = parser:getCursor(), parser:getCursor()   
+                assert.is_true(c1:equals(c2))
+        end)
+
+        it("returns false for unequal cursors", function()
+                local parser = luaclang.newParser("spec/struct.c")
+                local cursor = parser:getCursor()   
+                local first_decl
+                cursor:visitChildren(function(cursor, parent)
+                        first_decl = cursor
+                        return "break"
+                end)
+                assert.is_false(first_decl:equals(cursor))
+        end)
+end)
+
 --Type functions
 
 describe("cursor:getType()", function() 
@@ -630,4 +649,20 @@ describe("cursor_type:getNumArgTypes()", function()
                 end, "calling 'getNumArgTypes' on bad self (expect type object with function kind)")
                 parser:dispose()
         end)
+end)
+
+describe("cursor_type:getTypeDeclaration()", function() 
+        it("obtains the cursor", function() 
+                local parser = luaclang.newParser("spec/typedecl.c")
+                local cursor = parser:getCursor()  
+                local struct_decl
+                cursor:visitChildren(function (cursor, parent)
+                        struct_decl = cursor
+                        return "break"
+                end)
+                cursor = get_last_child(cursor)
+                local cursor_type = cursor:getTypedefUnderlyingType()
+                local type_decl = cursor_type:getTypeDeclaration() 
+                assert.is_true(struct_decl:equals(type_decl))    
+        end)       
 end)

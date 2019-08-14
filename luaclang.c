@@ -326,6 +326,23 @@ static int cursor_gettypdef_underlying(lua_State *L)
         return 1;
 }
 
+/*
+        Format - cur1:equals(cur2)
+        Parameters - cur1 - First cursor
+                     cur2 - Second cursor
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#ga98df58f09878710b983b6f3f60f0cba3
+        Returns a boolean value after comparing the two cursors for equality
+*/
+static int cursor_equals(lua_State *L)
+{
+       CXCursor *cur1;
+       to_object(L, cur1, CURSOR_METATABLE, 1); 
+       CXCursor *cur2;
+       to_object(L, cur2, CURSOR_METATABLE, 2);
+       bool is_equal = clang_equalCursors(*cur1, *cur2);
+       lua_pushboolean(L, is_equal);
+       return 1;
+}
 enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
         lua_State *L = (lua_State*) client_data;
@@ -524,6 +541,22 @@ static int type_getnumargtypes(lua_State *L)
         return 1;
 }
 
+/*
+        Format - cur_type:getTypeDeclaration()
+        Parameter - cur_type - Type object whose cursor is to be obtained
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__TYPES.html#ga0aad74ea93a2f5dea58fd6fc0db8aad4
+        Returns the corresponding cursor for the declaration of given type
+ */
+static int type_gettypedecl(lua_State *L)
+{
+        CXType *type;
+        to_object(L, type, TYPE_METATABLE, 1);
+        CXCursor *cur;
+        new_object(L, cur, CURSOR_METATABLE);
+        *cur = clang_getTypeDeclaration(*type);
+        return 1;
+}
+
 static luaL_Reg clang_functions[] = {
         {"newParser", clang_newparser},
         {NULL, NULL}
@@ -549,6 +582,7 @@ static luaL_Reg cursor_functions[] = {
         {"isBitField", cursor_isbitfield},
         {"getBitFieldWidth", cursor_getbitfield_width},
         {"getTypedefUnderlyingType", cursor_gettypdef_underlying},
+        {"equals", cursor_equals},
         {NULL, NULL}
 };
 
@@ -560,7 +594,8 @@ static luaL_Reg type_functions[] = {
         {"getArraySize", type_getarrsize},
         {"getPointeeType", type_getpointee_type},
         {"getTypeKind", type_gettypekind},
-        {"getNumArgTypes", type_getnumargtypes},    
+        {"getNumArgTypes", type_getnumargtypes},   
+        {"getTypeDeclaration", type_gettypedecl}, 
         {NULL, NULL}
 };
 
