@@ -432,16 +432,11 @@ describe("cursor:getTypedefUnderlyingType()", function()
         end)
 end)
 
-describe("cur1:equalCursors(cur2)", function()
+describe("cur1:equals(cur2)", function()
         it("returns true for equal cursors", function()
                 local parser = luaclang.newParser("spec/struct.c")
-                local cursor = parser:getCursor()   
-                local tu_cursor
-                cursor:visitChildren(function(cursor, parent)
-                        tu_cursor = parent
-                        return "break"
-                end)
-                assert.are.same(true, tu_cursor:equalCursors(cursor))
+                local c1, c2 = parser:getCursor(), parser:getCursor()   
+                assert.is_true(c1:equals(c2))
         end)
 
         it("returns false for unequal cursors", function()
@@ -452,7 +447,7 @@ describe("cur1:equalCursors(cur2)", function()
                         first_decl = cursor
                         return "break"
                 end)
-                assert.are.same(false, first_decl:equalCursors(cursor))
+                assert.is_false(first_decl:equals(cursor))
         end)
 end)
 
@@ -668,6 +663,6 @@ describe("cursor_type:getTypeDeclaration()", function()
                 cursor = get_last_child(cursor)
                 local cursor_type = cursor:getTypedefUnderlyingType()
                 local type_decl = cursor_type:getTypeDeclaration() 
-                assert.are.same(true, struct_decl:equalCursors(type_decl))    
+                assert.is_true(struct_decl:equals(type_decl))    
         end)       
 end)
