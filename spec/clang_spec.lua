@@ -48,6 +48,15 @@ describe("parser:getDiagnostic(idx)", function()
                 assert.are.same(expected, diags)
                 parser:dispose()
         end)
+        
+        it("uses an index that is out of bounds", function()
+                local luaclang = require "luaclang"
+                local parser = luaclang.newParser("spec/diagnostics.c")
+                assert.has.errors(function()
+                        line, column, msg = parser:getDiagnostic(3)
+                end, "calling 'getDiagnostic' on bad self (argument index out of bounds)")
+                parser:dispose()
+        end)
 end)
 
 --Cursor functions
@@ -161,7 +170,7 @@ describe("cursor:visitChildren()", function()
                         cur:visitChildren(function (cursor, parent)
                           error("myerror")
                         end)
-                end, "spec/clang_spec.lua:162: myerror")
+                end, "spec/clang_spec.lua:171: myerror")
                 parser:dispose()
         end)
  

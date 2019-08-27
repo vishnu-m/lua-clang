@@ -120,8 +120,9 @@ static int parser_getdiagnostic(lua_State *L)
 {
         clang_parser *parser;
         to_object(L, parser, PARSER_METATABLE, 1);
-        unsigned int index = luaL_checkinteger(L, 2);
         luaL_argcheck(L, parser->tu != NULL, 1, "parser object was disposed");
+        unsigned int index = luaL_checkinteger(L, 2);
+        luaL_argcheck(L, index <= clang_getNumDiagnostics(parser->tu), 1, "argument index out of bounds");
         CXDiagnostic diag = clang_getDiagnostic(parser->tu, index-1);
         CXSourceLocation location = clang_getDiagnosticLocation(diag);
         unsigned int line, column;
