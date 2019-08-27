@@ -88,6 +88,54 @@ static int parser_getcursor(lua_State *L)
         return 1;
 }
 
+/*      
+        Format - parser:getNumDiagnostics()
+        Parameter - parser - Clang object whose translation unit is to be diagnosed 
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__DIAG.html#gae9f047b4bbbbb01161478d549b7aab25
+        Returns the number of diagnostics produced for the given translation unit 
+*/
+static int parser_getnumdiagnostics(lua_State *L)
+{
+        clang_parser *parser;
+        to_object(L, parser, PARSER_METATABLE, 1);
+        luaL_argcheck(L, parser->tu != NULL, 1, "parser object was disposed");
+        unsigned int num_diags = clang_getNumDiagnostics(parser->tu);
+        lua_pushinteger(L, num_diags);
+        return 1;
+}
+
+/*      
+        Format - parser:getDiagnostic(idx)
+        Parameters - parser - Clang object whose translation unit is to be diagnosed 
+                   - idx    - Index of the specific diagnostic
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__DIAG.html#ga3f54a79e820c2ac9388611e98029afe5
+                  - https://clang.llvm.org/doxygen/group__CINDEX__DIAG.html#gabfcf70ac15bb3e5ae39ef2c5e07c7428
+                  - https://clang.llvm.org/doxygen/group__CINDEX__LOCATIONS.html#ga01f1a342f7807ea742aedd2c61c46fa0
+                  - https://clang.llvm.org/doxygen/group__CINDEX__DIAG.html#ga455234ab6de0ca12c9ea36f8874060e8
+        Returns - 1. Line number 
+                  2. Column number
+                  3. Diagnostic message 
+*/
+static int parser_getdiagnostic(lua_State *L)
+{
+        clang_parser *parser;
+        to_object(L, parser, PARSER_METATABLE, 1);
+        luaL_argcheck(L, parser->tu != NULL, 1, "parser object was disposed");
+        unsigned int index = luaL_checkinteger(L, 2);
+        luaL_argcheck(L, index <= clang_getNumDiagnostics(parser->tu), 1, "argument index out of bounds");
+        CXDiagnostic diag = clang_getDiagnostic(parser->tu, index-1);
+        CXSourceLocation location = clang_getDiagnosticLocation(diag);
+        unsigned int line, column;
+        clang_getSpellingLocation(location, NULL, &line, &column, NULL);
+        CXString err_str = clang_formatDiagnostic(diag, 0);
+        lua_pushinteger(L, line);
+        lua_pushinteger(L, column);
+        lua_pushstring(L, clang_getCString(err_str));
+        clang_disposeDiagnostic(diag);
+        clang_disposeString(err_str);
+        return 3;  
+}
+
 /* --Cursor functions-- */
 
 /*      
@@ -329,7 +377,7 @@ static int cursor_gettypdef_underlying(lua_State *L)
 /*
         Format - cur1:equals(cur2)
         Parameters - cur1 - First cursor
-                     cur2 - Second cursor
+                   - cur2 - Second cursor
         More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#ga98df58f09878710b983b6f3f60f0cba3
         Returns a boolean value after comparing the two cursors for equality
 */
@@ -521,7 +569,9 @@ static int type_gettypekind(lua_State *L)
 {
         CXType *type;
         to_object(L, type, TYPE_METATABLE, 1);
-        lua_pushstring(L, clang_getCString(clang_getTypeKindSpelling(type->kind)));
+        CXString kind_str = clang_getTypeKindSpelling(type->kind);
+        lua_pushstring(L, clang_getCString(kind_str));
+        clang_disposeString(kind_str);
         return 1;
 }
 
@@ -566,6 +616,8 @@ static luaL_Reg parser_functions[] = {
         {"dispose", parser_dispose},
         {"getCursor", parser_getcursor},
         {"__gc", parser_dispose},
+        {"getNumDiagnostics", parser_getnumdiagnostics},
+        {"getDiagnostic", parser_getdiagnostic},
         {NULL, NULL}
 };
 

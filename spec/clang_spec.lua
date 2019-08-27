@@ -23,6 +23,42 @@ describe("parser:getCursor()", function()
         end)       
 end)
 
+describe("parser:getNumDiagnostics()", function()
+        it("obtains the expected number of diagnostics", function()
+                local parser = luaclang.newParser("spec/diagnostics.c")
+                local num_diags = parser:getNumDiagnostics()
+                assert.are.equal(2, num_diags)
+                parser:dispose()
+        end)
+end)
+
+describe("parser:getDiagnostic(idx)", function()
+        it("obtains the expected diagnostics", function()
+                local parser = luaclang.newParser("spec/diagnostics.c")
+                local num_diags = parser:getNumDiagnostics()
+                local expected = {
+                        "1:1: warning: return type of 'main' is not 'int'",
+                        "2:9: error: void function 'main' should not return a value"
+                }
+                local diags = {}
+                for i=1, num_diags do
+                        line, column, msg = parser:getDiagnostic(i)
+                        table.insert(diags, line .. ':' .. column .. ': ' .. msg)
+                end
+                assert.are.same(expected, diags)
+                parser:dispose()
+        end)
+        
+        it("uses an index that is out of bounds", function()
+                local luaclang = require "luaclang"
+                local parser = luaclang.newParser("spec/diagnostics.c")
+                assert.has.errors(function()
+                        line, column, msg = parser:getDiagnostic(3)
+                end, "calling 'getDiagnostic' on bad self (argument index out of bounds)")
+                parser:dispose()
+        end)
+end)
+
 --Cursor functions
 
 describe("cursor:getSpelling()", function() 
@@ -134,7 +170,7 @@ describe("cursor:visitChildren()", function()
                         cur:visitChildren(function (cursor, parent)
                           error("myerror")
                         end)
-                end, "spec/clang_spec.lua:135: myerror")
+                end, "spec/clang_spec.lua:171: myerror")
                 parser:dispose()
         end)
  
