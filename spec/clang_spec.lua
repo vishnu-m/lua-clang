@@ -483,7 +483,7 @@ describe("cur1:equals(cur2)", function()
         end)
 
         it("returns false for unequal cursors", function()
-                local parser = luaclang.newParser("spec/forward_declaration.c")
+                local parser = luaclang.newParser("spec/struct.c")
                 local cursor = parser:getCursor()   
                 local first_decl
                 cursor:visitChildren(function(cursor, parent)
