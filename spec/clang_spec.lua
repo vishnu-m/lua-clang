@@ -14,6 +14,13 @@ describe("luaclang.newParser()", function()
         end)
 end)
 
+describe("luaclang.getNullCursor()", function() 
+        it("creates null cursor", function() 
+                local null_cursor = luaclang.getNullCursor()
+                assert.are.same('userdata', type(null_cursor))
+        end)       
+end)
+
 describe("parser:getCursor()", function() 
         it("creates translation unit cursor", function() 
                 local parser = luaclang.newParser("spec/visit.c")
@@ -170,7 +177,7 @@ describe("cursor:visitChildren()", function()
                         cur:visitChildren(function (cursor, parent)
                           error("myerror")
                         end)
-                end, "spec/clang_spec.lua:171: myerror")
+                end, "spec/clang_spec.lua:178: myerror")
                 parser:dispose()
         end)
  
@@ -476,7 +483,7 @@ describe("cur1:equals(cur2)", function()
         end)
 
         it("returns false for unequal cursors", function()
-                local parser = luaclang.newParser("spec/struct.c")
+                local parser = luaclang.newParser("spec/forward_declaration.c")
                 local cursor = parser:getCursor()   
                 local first_decl
                 cursor:visitChildren(function(cursor, parent)
@@ -484,6 +491,26 @@ describe("cur1:equals(cur2)", function()
                         return "break"
                 end)
                 assert.is_false(first_decl:equals(cursor))
+        end)
+end)
+
+describe("cur:getCursorDefinition()", function()
+        it("returns the cursor definition", function()
+                local parser = luaclang.newParser("spec/forward_declaration.c")
+                local cursor = parser:getCursor()  
+                local expected = {"a", "j"} 
+                local definition = {}
+                local first_decl
+                cursor:visitChildren(function(cursor, parent)
+                        first_decl = cursor
+                        return "break"
+                end)
+                local def_cur = first_decl:getCursorDefinition()
+                def_cur:visitChildren(function(cursor, parent)
+                        table.insert(definition, cursor:getSpelling())
+                        return "recurse"
+                end)
+                assert.are.same(expected, definition)
         end)
 end)
 
