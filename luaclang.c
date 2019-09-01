@@ -27,7 +27,7 @@ typedef struct clang_parser {
 /* --Clang functions-- */
 
 /*      
-        Format - newParser(file_name)
+        Format - luaclang.newParser(file_name)
         Parameter - file_name - The name of the source file to load 
         More info - 1. https://clang.llvm.org/doxygen/group__CINDEX.html#ga51eb9b38c18743bf2d824c6230e61f93
                     2. https://clang.llvm.org/doxygen/group__CINDEX__TRANSLATION__UNIT.html#ga2baf83f8c3299788234c8bce55e4472e
@@ -48,6 +48,21 @@ static int clang_newparser(lua_State *L)
         luaL_argcheck(L, parser->tu != NULL, 1, "translation unit wasn't created");
         return 1;
 }
+
+/*      
+        Format - luaclang.getNullCursor()
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__MANIP.html#ga94d81bbf40dff4ac843458d018f3138e
+        Returns a null cursor
+*/
+static int clang_getnullcursor(lua_State *L)
+{
+        CXCursor *cur;
+        new_object(L, cur, CURSOR_METATABLE);
+        *cur = clang_getNullCursor();
+        return 1;
+}
+
+/* --Parser functions-- */
 
 /*      
         Format - parser:dispose()
@@ -391,6 +406,23 @@ static int cursor_equals(lua_State *L)
        lua_pushboolean(L, is_equal);
        return 1;
 }
+
+/*
+        Format - cur:getCursorDefinition()
+        Parameter - cur - Cursor
+        More info - https://clang.llvm.org/doxygen/group__CINDEX__CURSOR__XREF.html#gafcfbec461e561bf13f1e8540bbbd655b
+        Returns the cursor that describes the definition of cur
+*/
+static int cursor_getcursor_definition(lua_State *L)
+{
+        CXCursor *cur;
+        to_object(L, cur, CURSOR_METATABLE, 1);
+        CXCursor *def_cur;
+        new_object(L, def_cur, CURSOR_METATABLE);
+        *def_cur = clang_getCursorDefinition(*cur);
+        return 1;
+}
+
 enum CXChildVisitResult visitor_function(CXCursor cursor, CXCursor parent, CXClientData client_data)
 {
         lua_State *L = (lua_State*) client_data;
@@ -609,6 +641,7 @@ static int type_gettypedecl(lua_State *L)
 
 static luaL_Reg clang_functions[] = {
         {"newParser", clang_newparser},
+        {"getNullCursor", clang_getnullcursor},
         {NULL, NULL}
 };
 
@@ -635,6 +668,7 @@ static luaL_Reg cursor_functions[] = {
         {"getBitFieldWidth", cursor_getbitfield_width},
         {"getTypedefUnderlyingType", cursor_gettypdef_underlying},
         {"equals", cursor_equals},
+        {"getCursorDefinition", cursor_getcursor_definition},
         {NULL, NULL}
 };
 
